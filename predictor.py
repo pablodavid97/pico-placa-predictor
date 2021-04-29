@@ -53,6 +53,59 @@ def pico_placa(plate_input, date_input, time_input):
 
     return message_flag
 
+def plate_validation(plate_input):
+    digits_num = len(plate_input)
+    correct_format = True
+
+    # checks if license plate has the correct format
+    if digits_num != 6 and digits_num != 7:
+        correct_format = False
+    else:
+        letters = plate_input[0:3]
+        numbers = plate_input[3:]
+
+        # Logs for testing purposes
+        print("Letters: ", letters)
+        print("Numbers: ", numbers)
+
+        # checks if first three characters of plate are letters
+        if not letters.isalpha():
+            correct_format = False
+
+        # checks if there are 3 or 4 numbers at the end of the plate
+        if correct_format:
+            numbers_length = len(numbers)
+
+            if numbers_length != 3 and numbers_length != 4:
+                correct_format = False
+            else:
+                if not numbers.isdigit():
+                    correct_format = False
+
+    return correct_format
+
+def date_validation(date_input):
+    format = "%d/%m/%Y"
+    correct_format = True
+
+    try:
+        datetime.datetime.strptime(date_input, format)
+    except ValueError:
+        correct_format = False
+
+    return correct_format
+
+def time_validation(time_input):
+    format = "%H:%M"
+    correct_format = True
+
+    try:
+        datetime.datetime.strptime(time_input, format)
+    except ValueError:
+        correct_format = False
+
+    return correct_format
+
 def display_menu_options():
     print("1. Start Prediction")
     print("2. Exit")
@@ -90,11 +143,36 @@ def main():
         except ValueError:
             menu_option = -1
 
-        if(menu_option == 1):
+        if menu_option == 1:
             print("Enter the following information.")
-            user_plate = input("License plate: ")
-            user_date = input("Date in (dd/mm/yyyy) format: ")
-            user_time = input("Time in (HH:MM) format: ")
+            valid_plate = False
+            valid_date = False
+            valid_time = False
+
+            while not valid_plate:
+                user_plate = input("License plate: ")
+
+                if plate_validation(user_plate):
+                    valid_plate = True
+                else:
+                    print("Invalid license plate!")
+
+            while not valid_date:
+                user_date = input("Date in (dd/mm/yyyy) format: ")
+
+                if date_validation(user_date):
+                    valid_date = True
+                else:
+                    print("Invalid date format!")
+
+            while not valid_time:
+                user_time = input("Time in (HH:MM) format: ")
+
+                if time_validation(user_time):
+                    valid_time = True
+                else:
+                    print("Invalid time format!")
+
             continue_option = ""
             prediction = pico_placa(user_plate, user_date, user_time)
 
@@ -106,11 +184,11 @@ def main():
             print("Do you want to return to the main menu?")
             continue_option = input("Type 'y' if yes or any other key to exit program: ")
 
-            if (continue_option != 'y'):
+            if continue_option != 'y':
                 print(exit_message)
                 break
 
-        elif(menu_option == 2):
+        elif menu_option == 2:
             print(exit_message)
         else:
             print("Invalid option!")
