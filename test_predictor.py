@@ -1,5 +1,19 @@
+"""
+    test_predictor.py
+
+    Class created to run automated unit testings for the Pico & Placa predictor.
+
+    The tests are made for the following use-cases:
+        1. Users are allowed to go outside
+        2. Users are not allowed to go outside
+        3. License plate is not valid
+        4. Date format is incorrect (dd-mm-yyyy)
+        5. Time format is incorrect (hh h mm)
+"""
+
 import unittest
 from predictor import predictor, plate_validation, date_validation, time_validation
+
 
 class TestPredictor(unittest.TestCase):
     def test_car_can_transit(self):
@@ -53,6 +67,7 @@ class TestPredictor(unittest.TestCase):
         self.assertFalse(predictor("abc1230", "30/04/2021", "19:00"))
 
     def test_correct_plate(self):
+        # license plates can be introduced with uppercased or lowercased letters
         self.assertTrue(plate_validation("abc123"))
         self.assertTrue(plate_validation("abc1234"))
         self.assertTrue(plate_validation("ABC123"))
@@ -60,6 +75,7 @@ class TestPredictor(unittest.TestCase):
 
     def test_incorrect_plate(self):
         # plate length is incorrect
+        self.assertFalse(plate_validation("abe12"))
         self.assertFalse(plate_validation("abcde123456"))
 
         # plate first three characters contain numbers

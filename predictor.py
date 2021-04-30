@@ -1,7 +1,19 @@
+"""
+    predictor.py
+
+    Main program used to tell users if they are allowed to take the car outside or not.
+    This prediction is based on the Pico & Placa restrictions previously implemented in
+    the city of Quito.
+
+    To run the program successfully the user must provide a valid license plate, a date (dd/mm/yyyy),
+    and a time (HH:MM) with the correct format.
+"""
+
 import enum
 import datetime
 
 
+# maps the license plate last digits with the corresponding day of restriction
 class DateDigits(enum.Enum):
     Mon = [1, 2]
     Tue = [3, 4]
@@ -10,11 +22,24 @@ class DateDigits(enum.Enum):
     Fri = [9, 0]
 
 
+# contains rush hours time limits in a day
 class RushHours(enum.Enum):
     Morning = [datetime.time(7, 0), datetime.time(9, 30)]
     Evening = [datetime.time(16, 0), datetime.time(19, 30)]
 
 
+# returns true if given time is within rush hours, false if not
+def is_time_within_rush_hours(time_input):
+    time_flag = False
+
+    if ((RushHours.Morning.value[0] <= time_input <= RushHours.Morning.value[1]) or (
+            RushHours.Evening.value[0] <= time_input <= RushHours.Evening.value[1])):
+        time_flag = True
+
+    return time_flag
+
+
+# returns true if a car can go outside and false if not
 def predictor(plate_input, date_input, time_input):
     plate = plate_input
     last_digit = int(plate[-1])
@@ -25,34 +50,33 @@ def predictor(plate_input, date_input, time_input):
     selected_day = week_days[selected_day_indx]
     message_flag = True
 
+    # verifies if car has a restriction for the given date
+    # note that weekends do not have any restrictions
     if selected_day == "Monday":
         if last_digit == DateDigits.Mon.value[0] or last_digit == DateDigits.Mon.value[1]:
-            if ((RushHours.Morning.value[0] <= time <= RushHours.Morning.value[1]) or (
-                    RushHours.Evening.value[0] <= time <= RushHours.Evening.value[1])):
+            if is_time_within_rush_hours(time):
                 message_flag = False
     elif selected_day == "Tuesday":
         if last_digit == DateDigits.Tue.value[0] or last_digit == DateDigits.Tue.value[1]:
-            if ((RushHours.Morning.value[0] <= time <= RushHours.Morning.value[1]) or (
-                    RushHours.Evening.value[0] <= time <= RushHours.Evening.value[1])):
+            if is_time_within_rush_hours(time):
                 message_flag = False
     elif selected_day == "Wednesday":
         if last_digit == DateDigits.Wed.value[0] or last_digit == DateDigits.Wed.value[1]:
-            if ((RushHours.Morning.value[0] <= time <= RushHours.Morning.value[1]) or (
-                    RushHours.Evening.value[0] <= time <= RushHours.Evening.value[1])):
+            if is_time_within_rush_hours(time):
                 message_flag = False
     elif selected_day == "Thursday":
         if last_digit == DateDigits.Thu.value[0] or last_digit == DateDigits.Thu.value[1]:
-            if ((RushHours.Morning.value[0] <= time <= RushHours.Morning.value[1]) or (
-                    RushHours.Evening.value[0] <= time <= RushHours.Evening.value[1])):
+            if is_time_within_rush_hours(time):
                 message_flag = False
     elif selected_day == "Friday":
         if last_digit == DateDigits.Fri.value[0] or last_digit == DateDigits.Fri.value[1]:
-            if ((RushHours.Morning.value[0] <= time <= RushHours.Morning.value[1]) or (
-                    RushHours.Evening.value[0] <= time <= RushHours.Evening.value[1])):
+            if is_time_within_rush_hours(time):
                 message_flag = False
 
     return message_flag
 
+
+# determines if a given license plate is valid or not
 def plate_validation(plate_input):
     digits_num = len(plate_input)
     correct_format = True
@@ -64,15 +88,11 @@ def plate_validation(plate_input):
         letters = plate_input[0:3]
         numbers = plate_input[3:]
 
-        # Logs for testing purposes
-        # print("Letters: ", letters)
-        # print("Numbers: ", numbers)
-
         # checks if first three characters of plate are letters
         if not letters.isalpha():
             correct_format = False
 
-        # checks if there are 3 or 4 numbers at the end of the plate
+        # checks if the last 3 or 4 characters are numbers
         if correct_format:
             numbers_length = len(numbers)
 
@@ -84,6 +104,8 @@ def plate_validation(plate_input):
 
     return correct_format
 
+
+# returns true if date has the correct format, false if not
 def date_validation(date_input):
     format = "%d/%m/%Y"
     correct_format = True
@@ -95,6 +117,8 @@ def date_validation(date_input):
 
     return correct_format
 
+
+# returns true if time has the correct format, false if not
 def time_validation(time_input):
     format = "%H:%M"
     correct_format = True
@@ -106,17 +130,18 @@ def time_validation(time_input):
 
     return correct_format
 
+
 def display_menu_options():
     print("1. Start Prediction")
     print("2. Exit")
 
+# displays main menu that guides the user
 def main():
     menu_option = -1
 
-    # Test values
-    user_plate = "ABC1233"
-    user_date = "27/04/2021"
-    user_time = "19:00"
+    user_plate = ""
+    user_date = ""
+    user_time = ""
 
     positive_message = "Prediction: You are allowed to take your car outside. Have a safe trip!"
     negative_message = "Prediction: Don't take your car outside. Stay at home until rush hours are over and avoid unnecessary fines."
@@ -143,6 +168,7 @@ def main():
         except ValueError:
             menu_option = -1
 
+        # menu option 1 corresponds to the prediction functionality
         if menu_option == 1:
             print("Enter the following information.")
             valid_plate = False
@@ -188,8 +214,10 @@ def main():
                 print(exit_message)
                 break
 
+        # menu option 2 allows the user to exit program
         elif menu_option == 2:
             print(exit_message)
+        # any other option is considered invalid
         else:
             print("Invalid option!")
             menu_option = -1
