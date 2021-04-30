@@ -15,7 +15,7 @@ class RushHours(enum.Enum):
     Evening = [datetime.time(16, 0), datetime.time(19, 30)]
 
 
-def pico_placa(plate_input, date_input, time_input):
+def predictor(plate_input, date_input, time_input):
     plate = plate_input
     last_digit = int(plate[-1])
     date = datetime.datetime.strptime(date_input, "%d/%m/%Y")
@@ -65,8 +65,8 @@ def plate_validation(plate_input):
         numbers = plate_input[3:]
 
         # Logs for testing purposes
-        print("Letters: ", letters)
-        print("Numbers: ", numbers)
+        # print("Letters: ", letters)
+        # print("Numbers: ", numbers)
 
         # checks if first three characters of plate are letters
         if not letters.isalpha():
@@ -174,7 +174,7 @@ def main():
                     print("Invalid time format!")
 
             continue_option = ""
-            prediction = pico_placa(user_plate, user_date, user_time)
+            prediction = predictor(user_plate, user_date, user_time)
 
             if prediction:
                 print(positive_message)
